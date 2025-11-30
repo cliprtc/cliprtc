@@ -1,5 +1,3 @@
-#[cfg(unix)]
-use clipboard_rs::ClipboardContextX11Options;
 use clipboard_rs::ClipboardContext;
 use dashmap::{DashMap, DashSet};
 use once_cell::sync::Lazy;
@@ -88,11 +86,7 @@ pub struct GlobalClipboardInfo {
 }
 
 pub static CLIPBOARD_INFO: Lazy<GlobalClipboardInfo> = Lazy::new(|| {
-    #[cfg(not(unix))]
     let ctx = ClipboardContext::new().unwrap();
-    #[cfg(unix)]
-    let ctx = ClipboardContext::new_with_options(ClipboardContextX11Options { read_timeout: None })
-        .unwrap();
 
     let (tx, rx) = mpsc::unbounded_channel();
     GlobalClipboardInfo {
