@@ -1,0 +1,15 @@
+{
+  "identifier": "desktop-capability",
+  "platforms": [
+    "macOS",
+    "windows",
+    "linux"
+  ],
+  "windows": [
+    "settings"
+  ],
+  "permissions": [
+    "autostart:default",
+    "autostart:allow-is-enabled"
+  ]
+}
