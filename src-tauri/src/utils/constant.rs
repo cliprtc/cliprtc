@@ -1,3 +1,5 @@
+#[cfg(unix)]
+use clipboard_rs::ClipboardContextX11Options;
 use clipboard_rs::ClipboardContext;
 use dashmap::{DashMap, DashSet};
 use once_cell::sync::Lazy;
