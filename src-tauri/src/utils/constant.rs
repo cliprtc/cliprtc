@@ -43,6 +43,7 @@ pub static KEY: Lazy<String> = Lazy::new(|| {
 
 pub static MDNS_SERVICE_TYPE: &str = "_cliprtc._tcp.local.";
 
+#[cfg(any(dev, debug_assertions))]
 pub static SETTINGS_WINDOW_LABEL: &str = "settings";
 
 pub static DEVICES: Lazy<DashMap<String, DeviceInfo>> = Lazy::new(DashMap::new);
