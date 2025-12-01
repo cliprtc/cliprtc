@@ -34,12 +34,20 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
+          cache: pnpm
+
+      - uses: pnpm/action-setup@v3
+        with:
+          version: latest
 
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
           # Those targets are only used on macos runners so it's in an `if` to slightly speed up windows and linux builds.
           targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
 
       - name: install dependencies (ubuntu only)
         if: matrix.platform == 'ubuntu-22.04' # This must match the platform value defined above.
@@ -49,18 +57,14 @@ jobs:
 
       - name: install frontend dependencies
         # change this to npm, pnpm or bun depending on which one you use.
-        run: |
-          npm install pnpm -g
-          pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - uses: tauri-apps/tauri-action@ca517bcbe58fd7012408d7ddfaeff950428bdeb1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
-          releaseName: App v__VERSION__
-          releaseBody: See the assets to download this version and install.
+          tagName: v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
+          releaseName: v__VERSION__
           releaseDraft: true
-          prerelease: false
           args: ${{ matrix.args }}
-          releaseAssetNamePattern: '[name]_v[version]_[platform]_[arch][ext]'
+          releaseAssetNamePattern: '[name]_v[version]_[platform]_[arch][_setup][ext]'
