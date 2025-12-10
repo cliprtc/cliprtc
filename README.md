@@ -12,7 +12,10 @@
 
 ## 🖼️ Screenshots
 
-![settings](./screenshots/settings.png)
+<p align="center">
+  <img src="./screenshots/main.png" width="26.6%">
+  <img src="./screenshots/settings.png" width="50%">
+</p>
 
 ## ✨ Main Features
 

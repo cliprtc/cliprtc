@@ -13,7 +13,7 @@ use crate::{
     quic::struct_type::QuicTransfer,
     utils::{
         compress::decompress_path,
-        constant::{APP_TMP_DIR_FILES_CACHE, CLIPBOARD_INFO, DEVICE_ID},
+        constant::{ALLOW_DEVICE_IDS, APP_TMP_DIR_FILES_CACHE, CLIPBOARD_INFO, UUID},
     },
 };
 
@@ -43,7 +43,10 @@ async fn handle_request(connection: &quinn::Connection) {
         Ok((meta, recv)) => {
             let source_id = meta.source_id;
             let seq = meta.seq;
-            if source_id == *DEVICE_ID {
+            if source_id == UUID.to_string() {
+                return;
+            }
+            if !ALLOW_DEVICE_IDS.contains(&source_id) {
                 return;
             }
 

@@ -12,6 +12,28 @@
   "app": {
     "windows": [
       {
+        "title": "ClipRTC",
+        "label": "main",
+        "url": "/main",
+        "width": 340,
+        "height": 480,
+        "center": true,
+        "visible": true,
+        "resizable": false,
+        "transparent": true,
+        "maximizable": false,
+        "hiddenTitle": true,
+        "skipTaskbar": false,
+        "titleBarStyle": "Overlay",
+        "dragDropEnabled": false,
+        "windowEffects": {
+          "effects": [
+            "sidebar"
+          ],
+          "state": "active"
+        }
+      },
+      {
         "title": "Settings",
         "label": "settings",
         "url": "/settings",

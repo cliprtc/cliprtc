@@ -8,6 +8,7 @@ export default {
   },
   tray: {
     menu: {
+      open_main: '打开主页',
       open_settings: '打开设置',
       version: '版本',
       restart: '重启程序',
@@ -15,6 +16,25 @@ export default {
     },
   },
   window: {
+    main: {
+      title: 'ClipRTC',
+      tabs:{
+        my: {
+          title: '我的设备',
+          empty: {
+            title: '未连接任何设备',
+            desc: '请连接设备以开始使用ClipRTC',
+          }
+        },
+        other: {
+          title: '其他设备',
+          empty: {
+            title: '未找到任何设备',
+            desc: `如果长时间无法识别，请检查设置中的"密钥"是否一致`
+          }
+        }
+      }
+    },
     settings: {
       title: '设置',
       general: {

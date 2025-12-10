@@ -7,7 +7,7 @@ use query::query;
 use register::register;
 
 pub fn start(port: u16, fingerprint: String) -> ServiceDaemon {
-    let (mdns, self_id) = register(port, fingerprint);
-    query(&mdns, self_id);
+    let mdns = register(port, fingerprint);
+    query(&mdns);
     mdns
 }

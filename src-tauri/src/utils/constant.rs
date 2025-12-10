@@ -7,13 +7,39 @@ use std::{
         atomic::{AtomicBool, AtomicU64},
         Arc,
     },
-    time::{SystemTime, UNIX_EPOCH},
 };
 use tauri::{Manager, Wry};
 use tauri_plugin_store::StoreExt;
 use tokio::sync::{mpsc, RwLock};
+use uuid::Uuid;
 
 use crate::{clipboard::struct_type::ClipboardInfo, global_struct::DeviceInfo, APP};
+
+pub static STORE_INFO: Lazy<Arc<tauri_plugin_store::Store<Wry>>> = Lazy::new(|| {
+    // In dev mode, use the dev.json suffix
+    #[cfg(any(dev, debug_assertions))]
+    let path = "stores/.info.dev.json";
+    // Use the official path in non-dev mode
+    #[cfg(not(any(dev, debug_assertions)))]
+    let path = "stores/.info.json";
+
+    let app = APP.get().unwrap();
+    let store = app.store(path).unwrap();
+
+    store
+});
+
+pub static UUID: Lazy<String> = Lazy::new(|| {
+    let key = "uuid";
+    match STORE_INFO.get(key) {
+        Some(value) => serde_json::from_value::<String>(value).unwrap(),
+        None => {
+            let value = Uuid::new_v4().to_string();
+            STORE_INFO.set(key, value.clone());
+            value
+        }
+    }
+});
 
 pub static STORE_SETTINGS: Lazy<Arc<tauri_plugin_store::Store<Wry>>> = Lazy::new(|| {
     // In dev mode, use the dev.json suffix
@@ -32,7 +58,7 @@ pub static STORE_SETTINGS: Lazy<Arc<tauri_plugin_store::Store<Wry>>> = Lazy::new
 pub static KEY: Lazy<String> = Lazy::new(|| {
     let key = "key";
     match STORE_SETTINGS.get(key) {
-        Some(value) => value.to_string(),
+        Some(value) => serde_json::from_value::<String>(value).unwrap(),
         None => {
             let value = "cliprtc";
             STORE_SETTINGS.set(key, value);
@@ -41,26 +67,23 @@ pub static KEY: Lazy<String> = Lazy::new(|| {
     }
 });
 
-pub static MDNS_SERVICE_TYPE: &str = "_cliprtc._tcp.local.";
+pub static MDNS_SERVICE_TYPE: &str = "_cliprtc._quic._udp.local.";
 
+#[cfg(any(dev, debug_assertions))]
+pub static MAIN_WINDOW_LABEL: &str = "main";
 #[cfg(any(dev, debug_assertions))]
 pub static SETTINGS_WINDOW_LABEL: &str = "settings";
 
-pub static DEVICES: Lazy<DashMap<String, DeviceInfo>> = Lazy::new(DashMap::new);
 pub static ALLOW_FINGERPRINT: Lazy<DashSet<String>> = Lazy::new(DashSet::new);
+pub static DEVICES: Lazy<DashMap<String, DeviceInfo>> = Lazy::new(DashMap::new);
+pub static ALLOW_DEVICE_IDS: Lazy<DashSet<String>> = Lazy::new(DashSet::new);
 
 pub static DEVICE_ID: Lazy<String> = Lazy::new(|| {
     let hostname = hostname::get()
-        .unwrap_or("unknown".into())
+        .unwrap_or(UUID.to_string().into())
         .to_string_lossy()
         .to_string();
-    let millis = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .unwrap()
-        .as_millis();
-    let short_id = format!("{:x}", millis);
-    let service_instance_name = format!("cliprtc-{}-{}", hostname, short_id);
-    service_instance_name
+    hostname
 });
 
 pub static APP_TMP_DIR: Lazy<PathBuf> = Lazy::new(|| {

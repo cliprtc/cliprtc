@@ -3,6 +3,7 @@
   "identifier": "default",
   "description": "Capability for the settings window",
   "windows": [
+    "main",
     "settings"
   ],
   "permissions": [

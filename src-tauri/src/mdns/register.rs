@@ -1,12 +1,12 @@
 use crate::utils::{
-    constant::{DEVICE_ID, KEY, MDNS_SERVICE_TYPE},
+    constant::{DEVICE_ID, KEY, MDNS_SERVICE_TYPE, UUID},
     encrypt,
 };
 use base64::{prelude::BASE64_STANDARD, Engine};
 use mdns_sd::{ServiceDaemon, ServiceInfo};
 use tauri_plugin_log::log;
 
-pub fn register(port: u16, fingerprint: String) -> (ServiceDaemon, String) {
+pub fn register(port: u16, fingerprint: String) -> ServiceDaemon {
     let mdns = ServiceDaemon::new().expect("Could not create service daemon");
 
     let service_type = MDNS_SERVICE_TYPE;
@@ -20,6 +20,7 @@ pub fn register(port: u16, fingerprint: String) -> (ServiceDaemon, String) {
         ("version", "1.0"),
         ("port", &port.to_string()),
         ("fingerprint", &fingerprint),
+        ("uuid", &UUID.to_string())
     ];
 
     let service_info = ServiceInfo::new(
@@ -42,5 +43,5 @@ pub fn register(port: u16, fingerprint: String) -> (ServiceDaemon, String) {
         &service_type
     );
 
-    (mdns, service_instance_name)
+    mdns
 }

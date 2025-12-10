@@ -8,6 +8,7 @@ export default {
   },
   tray: {
     menu: {
+      open_main: 'Open Main',
       open_settings: 'Open Settings',
       version: 'Version',
       restart: 'Restart App',
@@ -15,6 +16,25 @@ export default {
     },
   },
   window: {
+    main: {
+      title: 'ClipRTC',
+      tabs:{
+        my: {
+          title: 'My Devices',
+          empty: {
+            title: 'No devices connected',
+            desc: 'Please connect a device to start using ClipRTC.',
+          }
+        },
+        other: {
+          title: 'Other Devices',
+          empty: {
+            title: 'No device found',
+            desc: `If it fails to be recognized for a long time, please check whether the "KEY" in the Settings is consistent.`
+          }
+        }
+      }
+    },
     settings: {
       title: 'Settings',
       general: {
