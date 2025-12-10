@@ -8,13 +8,13 @@ use tauri_plugin_log::log;
 
 use crate::utils::{
     compress::compress_paths,
-    constant::{APP_TMP_DIR_FILES_CACHE, CLIPBOARD_INFO, DEVICE_ID},
+    constant::{APP_TMP_DIR_FILES_CACHE, CLIPBOARD_INFO, UUID},
 };
 
 use super::struct_type::{ClipboardInfo, EClipboardKind};
 
 pub fn parse_clipboard_info(clipboards: Vec<ClipboardContent>) -> Option<ClipboardInfo> {
-    let source_id = DEVICE_ID.clone();
+    let source_id = UUID.clone();
     let seq = CLIPBOARD_INFO.seq.load(Ordering::SeqCst);
     for clipboard in clipboards {
         match clipboard {

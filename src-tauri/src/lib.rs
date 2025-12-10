@@ -40,9 +40,19 @@ pub fn run() {
                 .build(),
         )
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![cmds::exit_app, cmds::restart_app])
+        .invoke_handler(tauri::generate_handler![
+            cmds::exit_app,
+            cmds::restart_app,
+            // server
+            cmds::start_server,
+            // device
+            cmds::allow_device_add,
+            cmds::allow_device_remove,
+            cmds::get_devices
+        ])
         .setup(move |app| {
             APP.get_or_init(|| app.handle().clone());
+
             init::start();
 
             #[cfg(any(dev, debug_assertions))]
@@ -58,10 +68,12 @@ pub fn run() {
 #[cfg(any(dev, debug_assertions))]
 fn open_devtools() {
     use tauri::Manager;
-    use utils::constant::SETTINGS_WINDOW_LABEL;
+    use utils::constant::{MAIN_WINDOW_LABEL, SETTINGS_WINDOW_LABEL};
 
     let app = APP.get().unwrap();
+    let main_window = app.get_webview_window(MAIN_WINDOW_LABEL).unwrap();
     let settings_window = app.get_webview_window(SETTINGS_WINDOW_LABEL).unwrap();
+    main_window.open_devtools();
     settings_window.open_devtools();
 }
 

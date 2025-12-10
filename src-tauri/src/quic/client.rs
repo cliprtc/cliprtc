@@ -12,7 +12,7 @@ use tokio::fs::File;
 use crate::{
     clipboard::struct_type::{ClipboardInfo, EClipboardKind},
     quic::struct_type::{PayloadMeta, QuicTransfer},
-    utils::constant::{CLIPBOARD_INFO, DEVICES},
+    utils::constant::{ALLOW_DEVICE_IDS, CLIPBOARD_INFO, DEVICES},
 };
 
 pub fn start(client: Endpoint) {
@@ -27,19 +27,25 @@ pub fn start(client: Endpoint) {
 
 async fn handle_request(client: Endpoint, data: Arc<ClipboardInfo>) {
     for device in DEVICES.iter() {
+        let uuid = &device.meta_info.uuid;
+        if !ALLOW_DEVICE_IDS.contains(uuid) {
+            continue;
+        }
+
         let client = client.clone();
         let data = Arc::clone(&data);
         tokio::spawn(async move {
             let ip_addrs = device.addresses.v4.clone();
 
             if ip_addrs.is_empty() {
-                log::warn!("Device addresses is empty, skipping: {}", device.hostname);
+                log::warn!("Device addresses is empty, skipping: {}", device.host);
                 return;
             }
 
             let ip = ip_addrs.first().unwrap();
 
-            let server_addr = SocketAddr::new(IpAddr::V4(*ip), device.port);
+            let server_addr = SocketAddr::new(IpAddr::V4(*ip), device.meta_info.port);
+            log::info!("Connecting send to server: {}", server_addr);
             let connect = client.connect(server_addr, "localhost").unwrap();
             match connect.await {
                 Ok(connection) => {

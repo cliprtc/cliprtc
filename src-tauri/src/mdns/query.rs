@@ -2,29 +2,25 @@ use std::{collections::HashSet, net::IpAddr, sync::Arc};
 
 use crate::{
     global_struct::{AddressInfo, DeviceInfo, MdnsProperties},
-    utils::constant::{ALLOW_FINGERPRINT, DEVICES, MDNS_SERVICE_TYPE},
+    utils::{
+        constant::{ALLOW_FINGERPRINT, CLIPBOARD_INFO, DEVICES, MDNS_SERVICE_TYPE, UUID},
+        event::event_names,
+    },
+    APP,
 };
 use mdns_sd::{ScopedIp, ServiceDaemon, ServiceEvent};
-use tauri::async_runtime::spawn;
+use tauri::{async_runtime::spawn, Emitter};
 use tauri_plugin_log::log;
 
-pub fn query(mdns: &ServiceDaemon, self_id: String) {
+pub fn query(mdns: &ServiceDaemon) {
     let service_type = MDNS_SERVICE_TYPE;
     let receiver = Arc::new(mdns.browse(&service_type).expect("Failed to browse")).clone();
+    let app = APP.get().unwrap();
 
     spawn(async move {
         while let Ok(event) = receiver.recv() {
             match event {
                 ServiceEvent::ServiceResolved(info) => {
-                    if info.fullname.contains(&self_id) {
-                        continue;
-                    }
-                    if let Some(mut device) = DEVICES.get_mut(&info.fullname) {
-                        device.addresses = extract_addresses(&info.addresses);
-                        log::info!("Updated IP for existing device {}", info.fullname);
-                        continue;
-                    }
-
                     let map = info.txt_properties.into_property_map_str();
                     let mdns_properties = MdnsProperties::from_hashmap(map);
 
@@ -40,23 +36,47 @@ pub fn query(mdns: &ServiceDaemon, self_id: String) {
                         }
                     };
 
-                    let addresses = extract_addresses(&info.addresses);
+                    if meta_info.uuid == UUID.to_string() {
+                        continue;
+                    }
+
+                    let key = info.fullname.clone();
                     let fingerprint = meta_info.fingerprint.clone();
-                    let device = DeviceInfo {
-                        hostname: info.host,
-                        port: info.port,
-                        addresses,
-                        meta_info,
-                    };
+
+                    if let Some(mut device) = DEVICES.get_mut(&key) {
+                        let uuid = meta_info.uuid.clone();
+
+                        device.addresses = extract_addresses(&info.addresses);
+                        device.meta_info = meta_info;
+                        ALLOW_FINGERPRINT.insert(fingerprint);
+                        log::info!("Update existing server info: {}", info.fullname);
+
+                        // reset remote_seq_map
+                        let map = &CLIPBOARD_INFO.remote_seq_map;
+                        map.insert(uuid, 0);
+
+                        let _ = app.emit(event_names::DEVICE_FOUND, ());
+                        continue;
+                    }
+
                     log::info!(
                         "Server Found: {}:{} [v{}]",
                         info.fullname,
-                        device.meta_info.port,
-                        device.meta_info.version
+                        meta_info.port,
+                        meta_info.version
                     );
 
                     ALLOW_FINGERPRINT.insert(fingerprint);
-                    DEVICES.insert(info.fullname, device);
+
+                    let addresses = extract_addresses(&info.addresses);
+                    let device = DeviceInfo {
+                        host: info.host,
+                        fullname: info.fullname,
+                        addresses,
+                        meta_info,
+                    };
+                    DEVICES.insert(key, device);
+                    let _ = app.emit(event_names::DEVICE_FOUND, ());
                 }
                 ServiceEvent::ServiceRemoved(_name, fullname) => {
                     if DEVICES.contains_key(&fullname) {

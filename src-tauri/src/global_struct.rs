@@ -5,6 +5,7 @@ use std::{
 };
 
 use base64::{prelude::BASE64_STANDARD, Engine};
+use serde::{Deserialize, Serialize};
 
 use crate::utils::{constant::KEY, encrypt};
 
@@ -12,6 +13,7 @@ use crate::utils::{constant::KEY, encrypt};
 pub struct MdnsProperties {
     pub version: Option<String>,
     pub port: Option<String>,
+    pub uuid: Option<String>,
     pub fingerprint: Option<String>,
 }
 
@@ -21,6 +23,7 @@ impl MdnsProperties {
         MdnsProperties {
             version: map.get("version").cloned(),
             port: map.get("port").cloned(),
+            uuid: map.get("uuid").cloned(),
             fingerprint: map.get("fingerprint").cloned(),
         }
     }
@@ -29,11 +32,7 @@ impl MdnsProperties {
     pub fn to_meta_info(&self) -> Option<MetaInfo> {
         let validated_properties = self.validate_and_process();
 
-        validated_properties.map(|(version, port, fingerprint)| MetaInfo {
-            version,
-            port: port.to_string(), // Convert u16 port to String
-            fingerprint,
-        })
+        validated_properties
     }
 
     // Decode the fingerprint (Base64 -> Vec<u8>)
@@ -48,13 +47,7 @@ impl MdnsProperties {
     }
 
     // Validate and process version, port, and fingerprint
-    pub fn validate_and_process(&self) -> Option<(String, u16, String)> {
-        // Validate version
-        let version = self
-            .version
-            .as_ref()
-            .map(|v| v.clone())
-            .filter(|v| !v.is_empty());
+    pub fn validate_and_process(&self) -> Option<MetaInfo> {
 
         // Validate and parse port (convert to u16)
         let port = self.port.as_ref().and_then(|p| u16::from_str(&p).ok());
@@ -63,36 +56,42 @@ impl MdnsProperties {
         let fingerprint = self.fingerprint.as_ref().and_then(|f| {
             MdnsProperties::decode_fingerprint(f.clone())
                 .and_then(|data| MdnsProperties::decrypt_fingerprint(&data))
+                .and_then(|data| Some(String::from_utf8_lossy(&data).to_string()))
         });
 
         // If all fields are valid, return them; otherwise, return None
-        match (version, port, fingerprint) {
-            (Some(valid_version), Some(valid_port), Some(valid_fingerprint)) => {
-                let valid_fingerprint = String::from_utf8_lossy(&valid_fingerprint).to_string();
-                Some((valid_version, valid_port, valid_fingerprint))
+        match (self.version.clone(), port, self.uuid.clone(), fingerprint) {
+            (Some(valid_version), Some(valid_port), Some(valid_uuid), Some(valid_fingerprint)) => {
+                Some(MetaInfo {
+                    version: valid_version,
+                    port: valid_port,
+                    uuid: valid_uuid,
+                    fingerprint: valid_fingerprint,
+                })
             }
             _ => None, // If any field is invalid or missing, return None
         }
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DeviceInfo {
-    pub hostname: String,
-    pub port: u16,
+    pub host: String,
+    pub fullname: String,
     pub addresses: AddressInfo,
     pub meta_info: MetaInfo,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AddressInfo {
     pub v4: Vec<Ipv4Addr>,
     pub v6: Vec<Ipv6Addr>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MetaInfo {
     pub version: String,
-    pub port: String,
+    pub port: u16,
+    pub uuid: String,
     pub fingerprint: String,
 }

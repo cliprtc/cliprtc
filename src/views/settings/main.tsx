@@ -1,5 +1,4 @@
 import { getName, getVersion } from '@tauri-apps/api/app'
-import { invoke } from '@tauri-apps/api/core'
 import { disable, enable, isEnabled } from '@tauri-apps/plugin-autostart'
 import { useEffect, useState } from 'react'
 import { bugs, repository } from '@/../package.json'
@@ -28,9 +27,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
-import { LANGUAGES, useI18n } from '@/hooks/i18n'
-import { CMDS } from '@/utils/constant'
-import { SETTINGS_KEYS, SETTINGS_STORE } from '@/utils/store'
+import { useI18n } from '@/hooks/i18n'
+import { CMDS } from '@/utils/cmds'
+import { LANGUAGES, SETTINGS_KEYS, SETTINGS_STORE } from '@/utils/store'
 
 const components = {
   General,
@@ -75,7 +74,7 @@ function General() {
   const onSaveKey = async () => {
     await SETTINGS_STORE.set(SETTINGS_KEYS.KEY, key)
     await SETTINGS_STORE.save()
-    await invoke(CMDS.RESTART_APP)
+    await CMDS.restart_app()
   }
 
   const onChangeAutoStart = async (checked: boolean) => {
