@@ -46,13 +46,13 @@ async function onChangeLanguage() {
 
 function subscribe(callback: () => void) {
   const off = i18n.on('language:changed', (payload) => {
+    callback()
     if (defaultLanguage === payload.language) {
       return
     }
     defaultLanguage = payload.language
     crossTabEvent.emit('i18n:language:changed', payload)
     onChangeLanguage()
-    callback()
   })
   return () => {
     off()
