@@ -18,22 +18,22 @@ export default {
   window: {
     main: {
       title: 'ClipRTC',
-      tabs:{
+      tabs: {
         my: {
           title: '我的设备',
           empty: {
             title: '未连接任何设备',
             desc: '请连接设备以开始使用ClipRTC',
-          }
+          },
         },
         other: {
           title: '其他设备',
           empty: {
             title: '未找到任何设备',
-            desc: `如果长时间无法识别，请检查设置中的"密钥"是否一致`
-          }
-        }
-      }
+            desc: `如果长时间无法识别，请检查设置中的"密钥"是否一致`,
+          },
+        },
+      },
     },
     settings: {
       title: '设置',

@@ -2,8 +2,8 @@
 
 <p>
   <img src="./src/assets/img/logo/cliprtc-512x512.png" width="140" align="left">
-  A real-time LAN clipboard sharing application built with <b>Rust + Tauri v2</b> and <b>React</b>, 
-  designed for secure, fast, and seamless clipboard synchronization across multiple devices 
+  A real-time LAN clipboard sharing application built with <b>Rust + Tauri v2</b> and <b>React</b>,
+  designed for secure, fast, and seamless clipboard synchronization across multiple devices
   <b>within the same local network</b>.
   <br><br>
   Lightweight, privacy-friendly, zero configuration — your clipboard, everywhere on the LAN.

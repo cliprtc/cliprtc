@@ -7,7 +7,11 @@ export const WINDOW: Partial<Record<WindowsKey, Window>> = {}
 export async function initWindows() {
   const wins = await getAllWindows()
   wins.forEach((w) => {
-    if (w.label === Windows.MAIN) { WINDOW.MAIN = w }
-    if (w.label === Windows.SETTINGS) { WINDOW.SETTINGS = w }
+    if (w.label === Windows.MAIN) {
+      WINDOW.MAIN = w
+    }
+    if (w.label === Windows.SETTINGS) {
+      WINDOW.SETTINGS = w
+    }
   })
 }
