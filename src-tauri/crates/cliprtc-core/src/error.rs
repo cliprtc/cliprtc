@@ -12,6 +12,10 @@ pub enum CoreError {
     Protocol(String),
     #[error("trust error: {0}")]
     Trust(String),
+    #[error("transport error: {0}")]
+    Transport(String),
+    #[error("authentication error: {0}")]
+    Auth(String),
     #[error("io error: {0}")]
     Io(#[from] std::io::Error),
 }

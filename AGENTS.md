@@ -68,9 +68,10 @@ ClipRTC is a LAN clipboard-sync app: Tauri v2 (Rust backend) + React 19 / Vite 7
 ## Refactor status
 
 - The approved design is `docs/refactor-design.md`; Phase 0 plan is `docs/superpowers/plans/2026-11-07-core-v2-phase-0.md`.
-- `src-tauri/crates/cliprtc-core` is the new headless core crate. Phase 0 currently contains: deterministic room CA (`HKDF-SHA256` -> Ed25519), per-device Ed25519 identity, CA-issued device certs (SAN `cliprtc://device/<uuid>`), trust store, protocol envelope/codec, Lamport clock, dedup window.
+- `src-tauri/crates/cliprtc-core` is the new headless core crate. It currently contains: deterministic room CA (`HKDF-SHA256` -> Ed25519), per-device Ed25519 identity, CA-issued device certs (SAN `cliprtc://device/<uuid>`), trust store, protocol envelope/codec, Lamport clock, dedup window.
+- `transport` currently provides a minimal QUIC endpoint with mutual TLS, room-CA chain verification, certificate-to-`uuid` binding, trust-store enforcement, and one text event over a unidirectional stream. Integration tests cover same-room text exchange, wrong-room handshake failure, and changed-device-key rejection.
 - The legacy Tauri runtime in `src-tauri/src/{quic,mdns,clipboard}` is still active. Do not assume the new core is wired into the app yet.
-- Later phases (transport/session, discovery, file transfer, clipboard actor, persistence, typed IPC, UI) are not implemented.
+- Later phases (long-lived session manager/connection reuse, discovery, file transfer, clipboard actor, persistence, typed IPC, UI) are not implemented.
 
 ## Improvement priorities (from the audit)
 

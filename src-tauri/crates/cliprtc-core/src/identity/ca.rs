@@ -2,8 +2,8 @@ use ed25519_dalek::pkcs8::EncodePrivateKey;
 use hkdf::Hkdf;
 use rcgen::string::Ia5String;
 use rcgen::{
-    BasicConstraints, CertificateParams, CertifiedIssuer, DnType, IsCa, KeyPair, KeyUsagePurpose,
-    SanType, PKCS_ED25519,
+    BasicConstraints, CertificateParams, CertifiedIssuer, DnType, ExtendedKeyUsagePurpose, IsCa,
+    KeyPair, KeyUsagePurpose, SanType, PKCS_ED25519,
 };
 use rustls_pki_types::{CertificateDer, PrivateKeyDer, PrivatePkcs8KeyDer};
 use sha2::{Digest, Sha256};
@@ -67,6 +67,10 @@ impl RoomCa {
             .map_err(|e| CoreError::Identity(format!("device uri failed: {e}")))?;
         params.subject_alt_names.push(SanType::URI(uri));
         params.key_usages = vec![KeyUsagePurpose::DigitalSignature];
+        params.extended_key_usages = vec![
+            ExtendedKeyUsagePurpose::ServerAuth,
+            ExtendedKeyUsagePurpose::ClientAuth,
+        ];
         params
             .distinguished_name
             .push(DnType::CommonName, device.uuid.to_string());
