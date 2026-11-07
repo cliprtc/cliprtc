@@ -48,3 +48,7 @@ uuid = { version = "1.19.0", features = ["v4"] }
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-autostart = "2"
+
+[workspace]
+members = ["crates/cliprtc-core"]
+resolver = "2"
